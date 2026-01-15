@@ -515,19 +515,32 @@ export default function ARScene({
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
-      {/* Sidebar Toggle */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className={`absolute top-4 z-[60] p-3 rounded-full bg-slate-800/90 text-white border border-slate-600 transition-all duration-300 shadow-xl ${
-          isSidebarOpen ? 'left-64' : 'left-4'
-        }`}
-      >
-        {isSidebarOpen ? '◀' : '▶'}
-      </button>
+      {/* Sidebar Toggle - Only show when started */}
+      {isStarted && (
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={`absolute top-4 z-[60] p-3 rounded-full bg-slate-800/90 text-white border border-slate-600 transition-all duration-300 shadow-xl ${
+            isSidebarOpen ? 'left-64' : 'left-4'
+          }`}
+        >
+          {isSidebarOpen ? (
+            /* Left Chevron */
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          ) : (
+            /* Right Chevron */
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          )}
+        </button>
+      )}
 
       {/* Professional Sidebar */}
+      {/* Professional Sidebar - Only render when started (or handle visibility) */}
       <div className={`absolute left-0 top-0 bottom-0 w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-700 z-50 flex flex-col py-4 transition-transform duration-300 ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        isStarted && isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         
         <div className="px-4 mb-4">
