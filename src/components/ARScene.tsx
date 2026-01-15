@@ -516,20 +516,20 @@ export default function ARScene({
   return (
     <div className="fixed inset-0 z-50 bg-black">
       {/* Sidebar Toggle - Only show when started */}
+      {/* Sidebar Toggle - Connected Tab Style */}
       {isStarted && (
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`absolute top-4 z-[60] p-3 rounded-full bg-slate-800/90 text-white border border-slate-600 transition-all duration-300 shadow-xl ${
-            isSidebarOpen ? 'left-64' : 'left-4'
+          className={`absolute top-4 z-[9999] h-12 flex items-center justify-center bg-slate-900/95 text-white border-y border-r border-slate-700 transition-all duration-300 shadow-xl ${ 
+            isSidebarOpen ? 'left-64 rounded-r-xl border-l-0 w-12' : 'left-0 rounded-r-xl border-l-0 w-12'
           }`}
+          style={{ pointerEvents: 'auto' }}
         >
           {isSidebarOpen ? (
-            /* Left Chevron */
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           ) : (
-            /* Right Chevron */
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18l6-6-6-6" />
             </svg>
@@ -538,10 +538,11 @@ export default function ARScene({
       )}
 
       {/* Professional Sidebar */}
-      {/* Professional Sidebar - Only render when started (or handle visibility) */}
-      <div className={`absolute left-0 top-0 bottom-0 w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-700 z-50 flex flex-col py-4 transition-transform duration-300 ${
+      {/* Professional Sidebar - High Z-index for AR */}
+      <div className={`absolute left-0 top-0 bottom-0 w-64 bg-slate-900/95 backdrop-blur-xl border-r border-slate-700 z-[9990] flex flex-col py-4 transition-transform duration-300 ${
         isStarted && isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      }`}
+      style={{ pointerEvents: 'auto' }}>
         
         <div className="px-4 mb-4">
           <h2 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">メニュー</h2>
@@ -717,6 +718,7 @@ export default function ARScene({
       {/* Canvas Layer */}
       <div className="w-full h-full bg-slate-900">
         <Canvas>
+          <Suspense fallback={null}>
           {isSimulation ? (
             <>
                <PerspectiveCamera makeDefault position={[0, 1.6, 2]} />
@@ -771,6 +773,7 @@ export default function ARScene({
            
            <ambientLight intensity={1} />
            <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
+          </Suspense>
         </Canvas>
       </div>
 
@@ -779,23 +782,51 @@ export default function ARScene({
         isSidebarOpen ? 'pl-72' : 'pl-6'
       }`}>
         {/* Status Steps */}
-        <div className="flex items-center justify-center gap-2 sm:gap-4 mb-6">
-          <div className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-md ${
-            workflowState === 'scanning' ? 'bg-blue-600 text-white' : 'bg-black/40 text-slate-500 border border-slate-700'
+        {/* Connected Steps */}
+        <div className="relative flex items-center justify-between max-w-sm mx-auto mb-8 px-4">
+          {/* Connecting Line */}
+          <div className="absolute left-4 right-4 top-1/2 h-1 bg-slate-700 -z-10 rounded-full" />
+          <div className="absolute left-4 top-1/2 h-1 bg-blue-500 -z-10 rounded-full transition-all duration-500" 
+               style={{ 
+                 width: workflowState === 'scanning' ? '0%' : (workflowState === 'locked' ? '50%' : '100%'), 
+                 right: 'auto' 
+               }}
+          />
+
+          {/* Step 1 */}
+          <div className={`flex flex-col items-center gap-1 ${
+             workflowState === 'scanning' || workflowState === 'locked' || workflowState === 'placing' ? 'text-white' : 'text-slate-500'
           }`}>
-            1. スキャン
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors duration-300 ${
+               workflowState === 'scanning' ? 'bg-blue-600 border-blue-400' : 'bg-slate-800 border-slate-600'
+            }`}>
+              1
+            </div>
+            <span className="text-[10px] font-bold">スキャン</span>
           </div>
-          <div className="w-4 sm:w-8 h-px bg-slate-600" />
-          <div className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-md ${
-            workflowState === 'locked' ? 'bg-green-600 text-white' : 'bg-black/40 text-slate-500 border border-slate-700'
+
+          {/* Step 2 */}
+          <div className={`flex flex-col items-center gap-1 ${
+             workflowState === 'locked' || workflowState === 'placing' ? 'text-white' : 'text-slate-500'
           }`}>
-            2. ロック
+             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors duration-300 ${
+               workflowState === 'locked' || workflowState === 'placing' ? 'bg-green-600 border-green-400' : 'bg-slate-800 border-slate-600'
+            }`}>
+              2
+            </div>
+            <span className="text-[10px] font-bold">ロック</span>
           </div>
-          <div className="w-4 sm:w-8 h-px bg-slate-600" />
-          <div className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold backdrop-blur-md ${
-            workflowState === 'placing' ? 'bg-purple-600 text-white' : 'bg-black/40 text-slate-500 border border-slate-700'
+
+          {/* Step 3 */}
+          <div className={`flex flex-col items-center gap-1 ${
+             workflowState === 'placing' ? 'text-white' : 'text-slate-500'
           }`}>
-            3. 配置
+             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-colors duration-300 ${
+               workflowState === 'placing' ? 'bg-purple-600 border-purple-400' : 'bg-slate-800 border-slate-600'
+            }`}>
+              3
+            </div>
+            <span className="text-[10px] font-bold">配置</span>
           </div>
         </div>
 
