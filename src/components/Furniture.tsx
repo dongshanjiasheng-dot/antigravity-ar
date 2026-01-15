@@ -14,6 +14,7 @@ import Bookshelf from './models/Bookshelf';
 import Bed from './models/Bed';
 import Desk from './models/Desk';
 import CustomBox from './models/CustomBox';
+import { CustomGltf } from './models/CustomGltf';
 
 interface FurnitureProps {
   furniture: PlacedFurniture;
@@ -134,7 +135,11 @@ export default function Furniture({ furniture, isSelected, onSelect, onUpdatePos
       
       {/* Furniture model */}
       <group scale={displayScale}>
-        <FurnitureModel color={furniture.color} textures={furniture.textures} />
+        {furniture.type === 'custom' && furniture.modelUrl ? (
+          <CustomGltf url={furniture.modelUrl} dimensions={furniture.dimensions} selected={isSelected} />
+        ) : (
+          <FurnitureModel color={furniture.color} textures={furniture.textures} />
+        )}
       </group>
     </group>
   );

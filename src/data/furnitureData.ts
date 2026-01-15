@@ -26,6 +26,7 @@ export interface PlacedFurniture {
     top?: string;
   };
   textureUrl?: string;
+  modelUrl?: string;
 }
 
 export const FURNITURE_CATALOG: FurnitureDefinition[] = [

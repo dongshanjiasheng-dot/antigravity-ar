@@ -14,6 +14,7 @@ function HomeContent() {
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
   const [isARMode, setIsARMode] = useState(false);
   const [arSelectedType, setArSelectedType] = useState<FurnitureType | null>(null);
+  const [arSelectedModelUrl, setArSelectedModelUrl] = useState<string | null>(null);
   const [arSelectedDimensions, setArSelectedDimensions] = useState<[number, number, number] | undefined>(undefined);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isInteriorMenuOpen, setIsInteriorMenuOpen] = useState(false);
@@ -291,10 +292,13 @@ const dataURLtoBlob = (dataurl: string) => {
           onPlaceFurniture={(position, rotation, textureUrl) => {
             // Add furniture at AR position
             if (arSelectedType) {
-              addFurniture(arSelectedType, arSelectedDimensions, undefined, position, textureUrl);
+              addFurniture(arSelectedType, arSelectedDimensions, undefined, position, textureUrl, arSelectedModelUrl || undefined);
             }
           }}
-          onSelectType={setArSelectedType}
+          onSelectType={(type, modelUrl) => {
+            setArSelectedType(type);
+            setArSelectedModelUrl(modelUrl || null);
+          }}
           onUpdateDimensions={setArSelectedDimensions}
           onExitAR={() => setIsARMode(false)}
           inventory={inventory}

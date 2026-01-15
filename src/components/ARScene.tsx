@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useMemo } from 'react';
+import { useRef, useState, useCallback, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { XR, createXRStore, useXRHitTest, useXRPlanes } from '@react-three/xr';
 import { Matrix4, Vector3, Group, Box3 } from 'three';
@@ -333,8 +333,8 @@ interface ARSceneProps {
   furniture: PlacedFurniture[];
   selectedType: FurnitureType | null;
   selectedDimensions?: [number, number, number];
-  onPlaceFurniture: (position: [number, number, number], rotation: number, textureUrl?: string) => void;
-  onSelectType: (type: FurnitureType) => void;
+  onPlaceFurniture: (position: [number, number, number], rotation: number, textureUrl?: string, modelUrl?: string) => void;
+  onSelectType: (type: FurnitureType, modelUrl?: string) => void;
   onUpdateDimensions: (dimensions: [number, number, number]) => void;
   onExitAR: () => void;
   inventory?: CustomModel[];
@@ -364,6 +364,7 @@ export default function ARScene({
   const [gridSize, setGridSize] = useState(0.1); // 10cm default
   const [showDimensionInput, setShowDimensionInput] = useState(false);
   const [dimensionInput, setDimensionInput] = useState({ w: 1000, h: 1000, d: 1000 }); // mm
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSimulation, setIsSimulation] = useState(false);
   const [isStarted, setIsStarted] = useState(false); // Track if user has started a mode
   const [customTextureUrl, setCustomTextureUrl] = useState<string | null>(null);
@@ -435,6 +436,29 @@ export default function ARScene({
       }
     };
     input.click();
+  }, [addToInventory]);
+
+  const handleImportModel = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, []);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && addToInventory) {
+      const url = URL.createObjectURL(file);
+      const name = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      addToInventory({
+        name: name,
+        textureUrl: null,
+        modelUrl: url,
+      });
+      // Alert user
+      alert(`モデル "${name}" をインポートしました！\nリストから選択して配置できます。`);
+    }
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }, [addToInventory]);
 
   const handleHitUpdate = useCallback((isValid: boolean, position: Vector3 | null) => {
@@ -575,8 +599,23 @@ export default function ARScene({
               <span className="text-xs font-bold">デバッグ</span>
             </button>
             <button
+              onClick={handleImportModel}
+              className="flex flex-col items-center justify-center p-3 rounded-xl bg-orange-600/20 text-orange-400 hover:bg-orange-600/40 transition"
+            >
+              <span className="text-2xl mb-1">📂</span>
+              <span className="text-xs font-bold">3D読込</span>
+            </button>
+            {/* Hidden File Input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".glb,.gltf"
+              className="hidden"
+            />
+            <button
               onClick={() => setShowDimensionInput(true)}
-              className="col-span-2 flex flex-col items-center justify-center p-3 rounded-xl bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 transition"
+              className="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 transition"
             >
               <span className="text-2xl mb-1">📏</span>
               <span className="text-xs font-bold">サイズ変更</span>
@@ -612,7 +651,7 @@ export default function ARScene({
                 key={item.id}
                 onClick={() => {
                   setCustomTextureUrl(item.textureUrl);
-                  onSelectType('custom');
+                  onSelectType('custom', item.modelUrl || undefined);
                 }}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl border transition ${
                   selectedType === 'custom' && customTextureUrl === item.textureUrl

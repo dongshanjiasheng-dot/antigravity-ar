@@ -14,6 +14,7 @@ export interface CustomModel {
   id: string;
   name: string;
   textureUrl: string | null;
+  modelUrl?: string | null; // For GLB/GLTF models
   date: number;
 }
 
@@ -27,7 +28,8 @@ interface FurnitureContextType {
     dimensions?: [number, number, number],
     textures?: PlacedFurniture['textures'],
     initialPosition?: [number, number, number],
-    textureUrl?: string
+    textureUrl?: string,
+    modelUrl?: string // New Argument
   ) => string; // Returns instance ID
   removeFurniture: (instanceId: string) => void;
   updateFurniturePosition: (instanceId: string, position: [number, number, number]) => void;
@@ -66,7 +68,8 @@ export function FurnitureProvider({ children }: { children: ReactNode }) {
     dimensions?: [number, number, number],
     textures?: PlacedFurniture['textures'],
     initialPosition?: [number, number, number],
-    textureUrl?: string
+    textureUrl?: string,
+    modelUrl?: string
   ): string => {
     const definition = getFurnitureDefinition(type);
     if (!definition) return '';
@@ -81,6 +84,7 @@ export function FurnitureProvider({ children }: { children: ReactNode }) {
       dimensions: dimensions, // Include dimensions if provided
       textures: textures, // Include textures if provided
       textureUrl: textureUrl, // Include textureUrl if provided
+      modelUrl: modelUrl, // Include modelUrl if provided
     };
 
     setFurniture((prev) => [...prev, newFurniture]);
